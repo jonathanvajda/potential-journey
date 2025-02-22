@@ -235,3 +235,6 @@ function displayFileData(fileName, jsonData) {
         card.appendChild(ontologySelect);
     });
 }
+
+function loadFileList() {
+    fileList.innerHTML = '';

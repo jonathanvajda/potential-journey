@@ -46,40 +46,76 @@ request.onerror = (event) => {
 request.onsuccess = (event) => {
     db = event.target.result;
 
-    getOntologyObjectsFromDB()
-        .then(objects => {
-            if (objects.length > 0) {
-                ontologyObjects = objects;
-                const existingSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
-                existingSelects.forEach(select => populateOntologySelect(select));
-            } else {
-                fetch('ontology-objects.json')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        loadOntologyObjectsIntoDB(data);
-                        ontologyObjects = data;
-                        const existingSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
-                        existingSelects.forEach(select => populateOntologySelect(select));
-                    })
-                    .catch(error => {
-                        console.error("Error loading ontology objects:", error);
-                        const errorSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
-                        errorSelects.forEach(select => {
-                            select.innerHTML = '<option>Error loading ontology objects</option>';
+    function handleOntologyObjects(objects) {
+        ontologyObjects = objects;
+        const existingSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
+        existingSelects.forEach(select => populateOntologySelect(select));
+    }
+
+    // Check if the "ontologyObjects" object store exists
+    if (!db.objectStoreNames.contains("ontologyObjects")) {
+        // If it doesn't exist, create a dummy transaction to trigger onupgradeneeded
+        const transaction = db.transaction(["files"], "readwrite"); // Or any existing object store
+        transaction.oncomplete = () => {
+            getOntologyObjectsFromDB()
+                .then(objects => {
+                    if (objects.length > 0) {
+                        handleOntologyObjects(objects);
+                    } else {
+                        fetch('ontology-objects.json')
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                loadOntologyObjectsIntoDB(data);
+                                handleOntologyObjects(data);
+                            })
+                            .catch(error => {
+                                console.error("Error loading ontology objects:", error);
+                                const errorSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
+                                errorSelects.forEach(select => {
+                                    select.innerHTML = '<option>Error loading ontology objects</option>';
+                                });
+                            });
+                    }
+                });
+        }
+    } else {
+        getOntologyObjectsFromDB()
+            .then(objects => {
+                if (objects.length > 0) {
+                    handleOntologyObjects(objects);
+                } else {
+                    fetch('ontology-objects.json')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            loadOntologyObjectsIntoDB(data);
+                            handleOntologyObjects(data);
+                        })
+                        .catch(error => {
+                            console.error("Error loading ontology objects:", error);
+                            const errorSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
+                            errorSelects.forEach(select => {
+                                select.innerHTML = '<option>Error loading ontology objects</option>';
+                            });
                         });
-                    });
-            }
-        });
+                }
+            });
+    }
 };
+
 request.onupgradeneeded = (event) => {
     db = event.target.result;
     db.createObjectStore("files", { keyPath: "name" });
-    db.createObjectStore("ontologyObjects", { keyPath: "IRI" }); // Add object store for ontology objects
+    db.createObjectStore("ontologyObjects", { keyPath: "IRI" });
 };
 
 

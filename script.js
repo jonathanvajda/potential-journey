@@ -13,6 +13,33 @@ let db; // IndexedDB database object
 let ontologyObjects; // Store the ontology objects
 let selectedFile; // Store the selected file
 
+// Function to load ontology objects into IndexedDB
+function loadOntologyObjectsIntoDB(data) {
+    const transaction = db.transaction(["ontologyObjects"], "readwrite");
+    const objectStore = transaction.objectStore("ontologyObjects");
+    objectStore.clear(); // Clear any existing data first
+    data.forEach(obj => objectStore.put(obj));
+}
+
+// Function to retrieve ontology objects from IndexedDB
+function getOntologyObjectsFromDB() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["ontologyObjects"], "readonly");
+        const objectStore = transaction.objectStore("ontologyObjects");
+        const objects = [];
+        objectStore.openCursor().onsuccess = event => {
+            const cursor = event.target.result;
+            if (cursor) {
+                objects.push(cursor.value);
+                cursor.continue();
+            } else {
+                resolve(objects);
+            }
+        };
+        objectStore.openCursor().onerror = reject; // Handle errors in the cursor
+    });
+}
+
 // Initialize IndexedDB
 const request = indexedDB.open("dataMapperDB", 1);
 request.onerror = (event) => {
@@ -238,3 +265,4 @@ function displayFileData(fileName, jsonData) {
 
 function loadFileList() {
     fileList.innerHTML = '';
+}

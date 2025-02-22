@@ -82,7 +82,7 @@ loadButton.addEventListener('click', loadFileData);       // For loading and par
 function handleFileSelect(event) {
     const files = event.target.files;
     selectedFile = files[0];
-    fileList.innerHTML = ''; // Clear the file list
+    fileList.innerHTML = '';
     const listItem = document.createElement('li');
     listItem.textContent = selectedFile.name;
     fileList.appendChild(listItem);
@@ -121,7 +121,12 @@ function loadFileData() {
 
             const transformedData = transformData(jsonData, hasHeaders);
 
-            // ... (rest of the file processing logic - IndexedDB storage, display, etc.)
+            const transaction = db.transaction(["files"], "readwrite");
+            const objectStore = transaction.objectStore("files");
+            objectStore.put({ name: selectedFile.name, data: transformedData });
+
+            displayFileData(selectedFile.name, transformedData);
+
             statusSpan.textContent = " ✅ File loaded!";
             statusSpan.style.color = "green";
 
@@ -230,7 +235,3 @@ function displayFileData(fileName, jsonData) {
         card.appendChild(ontologySelect);
     });
 }
-
-function loadFileList() {
-    fileList.innerHTML = '';
-    const transaction = db.transaction(["files"], "readonly");

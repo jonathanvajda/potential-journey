@@ -17,11 +17,20 @@
         <div id="load" class="tab-pane active">
             <input type="file" id="fileInput" multiple accept=".xlsx, .csv, .tsv">
             <ul id="fileList"></ul>
-            <div id="dataTable"></div>  </div>
+            <div id="loadOptions">
+                <input type="checkbox" id="hasHeaders" checked>
+                <label for="hasHeaders">First row has column names</label>
+                <button id="loadButton">Load File</button>
+                <span id="loadStatus"></span>
+            </div>
+            <div id="dataTable"></div>
+        </div>
         <div id="mapping" class="tab-pane">
-            <div id="mappingContainer"></div> </div>
+            <div id="mappingContainer"></div>
+        </div>
         <div id="json" class="tab-pane">
-            <pre id="jsonDataDisplay"></pre> </div>
+            <pre id="jsonDataDisplay"></pre>
+        </div>
     </div>
 
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>

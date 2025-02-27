@@ -1,0 +1,21 @@
+[
+    {
+      "IRI": "https://www.commoncoreontologies.org/ont00001262",
+      "label": "person",
+      "synonym": "human"
+    },
+    {
+      "IRI": "https://www.commoncoreontologies.org/ont00001180",
+      "label": "organization"
+    },
+    {
+      "IRI": "https://www.commoncoreontologies.org/ont00001943",
+      "label": "supervises",
+      "synonym": "oversees"
+    },
+    {
+      "IRI": "https://www.commoncoreontologies.org/ont00001939",
+      "label": "is affiliated with",
+      "synonym": "has affiliation with"
+    }
+  ]

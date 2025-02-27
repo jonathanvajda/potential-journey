@@ -1,21 +1,5 @@
 const fileInput = document.getElementById('fileInput');
 const fileList = document.getElementById('fileList');
-
-const dataTable = document.getElementById('dataTable');
-const mappingContainer = document.getElementById('mappingContainer');
-const jsonDataDisplay = document.getElementById('jsonDataDisplay');
-const headerDisplay = document.getElementById('headerDisplay');
-const tabs = document.querySelectorAll('.tab');
-const tabPanes = document.querySelectorAll('.tab-pane');
-const loadButton = document.getElementById('loadButton');
-const hasHeadersCheckbox = document.getElementById('hasHeaders');
-const loadStatus = document.getElementById('loadStatus'); // For status messages
-
-let db;
-let ontologyObjects;
-let selectedFile;
-
-// Initialize IndexedDB (same as before)
 const dataDisplay = document.getElementById('dataDisplay');
 const headerDisplay = document.getElementById('headerDisplay');
 const tabs = document.querySelectorAll('.tab');
@@ -36,27 +20,6 @@ request.onupgradeneeded = (event) => {
     const objectStore = db.createObjectStore("files", { keyPath: "name" });
 };
 
-
-// Tab switching logic (same as before)
-tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tabPanes.forEach(pane => pane.classList.remove('active'));
-        const targetPaneId = tab.dataset.tab;
-        const targetPane = document.getElementById(targetPaneId);
-        tab.classList.add('active');
-        targetPane.classList.add('active');
-        if (targetPaneId === 'headers') {
-            displayHeaders();
-        }
-    });
-});
-
-// Fetch ontology objects (same as before)
-fetch('ontology-objects.json')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
     // Remove active class from all tabs and panes
@@ -92,14 +55,12 @@ fetch('ontology-objects.json')
     })
     .then(data => {
         ontologyObjects = data;
+        // Populate existing select elements (if any)
         const existingSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)'); // Select the ontology selects
         existingSelects.forEach(select => populateOntologySelect(select));
     })
     .catch(error => {
         console.error("Error loading ontology objects:", error);
-        const errorSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)');
-        errorSelects.forEach(select => {
-            select.innerHTML = '<option>Error loading ontology objects</option>';
         const errorSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)'); // Select the ontology selects
         errorSelects.forEach(select => {
           select.innerHTML = '<option>Error loading ontology objects</option>';
@@ -121,74 +82,6 @@ function populateOntologySelect(select) {
 }
 
 fileInput.addEventListener('change', handleFileSelect);
-loadButton.addEventListener('click', loadFileData); // Added event listener
-
-function handleFileSelect(event) {
-    const files = event.target.files;
-    selectedFile = files[0];
-    fileList.innerHTML = '';
-    const listItem = document.createElement('li');
-    listItem.textContent = selectedFile.name;
-    fileList.appendChild(listItem);
-    loadButton.disabled = !selectedFile; // Disable if no file selected
-}
-
-function loadFileData() {
-    if (!selectedFile) {
-        alert("Please select a file first.");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const fileData = e.target.result;
-        let jsonData;
-        const hasHeaders = hasHeadersCheckbox.checked;
-
-        try {
-            if (selectedFile.name.endsWith('.xlsx')) {
-                const workbook = XLSX.read(fileData, { type: 'binary' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                jsonData = XLSX.utils.sheet_to_json(worksheet, { header: hasHeaders ? 1 : undefined });
-            } else if (selectedFile.name.endsWith('.csv') || selectedFile.name.endsWith('.tsv')) {
-                jsonData = Papa.parse(fileData, { header: hasHeaders, dynamicTyping: true }).data;
-            } else {
-                throw new Error("Unsupported file type.");
-            }
-
-            const transformedData = transformData(jsonData, hasHeaders); // Pass hasHeaders
-
-            const transaction = db.transaction(["files"], "readwrite");
-            const objectStore = transaction.objectStore("files");
-            objectStore.put({ name: selectedFile.name, data: transformedData });
-
-            displayFileData(selectedFile.name, transformedData);
-
-            loadStatus.textContent = " ✅ File loaded!";
-            loadStatus.style.color = "green";
-        } catch (error) {
-            console.error("File processing error:", error);
-            loadStatus.textContent = " ❌ Error: " + error.message;
-            loadStatus.style.color = "red";
-        }
-        loadFileList();
-    };
-
-    reader.readAsBinaryString(selectedFile);
-}
-
-function transformData(jsonData, hasHeaders) {
-    if (!jsonData || jsonData.length === 0) {
-        return [];
-    }
-
-    if (!hasHeaders) {
-        return jsonData.map((row, index) => ({ id: index + 1, ...row }));
-    }
-
-    const headers = Object.keys(jsonData[0]);
-    const transformedData = jsonData.slice(1).map((row, index) => {
 
 function handleFileSelect(event) {
     const files = event.target.files;

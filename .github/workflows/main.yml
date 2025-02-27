@@ -21,7 +21,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           mkdir -p public
-          cp -r * public/
+          rsync -av --exclude=public --exclude=.git ./ public/
           touch public/.nojekyll
           echo "Master branch deployed"
 
@@ -29,7 +29,7 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         run: |
           mkdir -p public/dev
-          cp -r * public/dev/
+          rsync -av --exclude=public --exclude=.git ./ public/dev/
           touch public/dev/.nojekyll
           echo "Dev branch deployed to /dev"
 

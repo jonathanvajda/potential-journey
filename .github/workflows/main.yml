@@ -1,10 +1,9 @@
-name: Deploy GitHub Pages for master and dev
+name: Deploy GitHub Pages
 
 on:
   push:
     branches:
       - master
-      - dev
 
 jobs:
   deploy:
@@ -17,21 +16,12 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Prepare Master Deployment
-        if: github.ref == 'refs/heads/master'
-        run: |
-          mkdir -p public
-          rsync -av --exclude=.git --exclude=public ./ public/
-          touch public/.nojekyll
-          echo "Master branch deployed to /"
-
-      - name: Prepare Dev Deployment
-        if: github.ref == 'refs/heads/dev'
+      - name: Prepare Deployment
         run: |
           mkdir -p public/dev
-          rsync -av --exclude=.git --exclude=public ./ public/dev/
+          rsync -av --exclude=.git ./ public/
           touch public/.nojekyll
-          echo "Dev branch deployed to /dev"
+          echo "Deployment ready: root and dev/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

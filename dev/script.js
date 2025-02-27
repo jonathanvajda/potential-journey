@@ -11,16 +11,12 @@ const loadButton = document.getElementById('loadButton');
 const hasHeadersCheckbox = document.getElementById('hasHeaders');
 const loadStatus = document.getElementById('loadStatus'); // For status messages
 
-let db;
-let ontologyObjects;
+let db; // IndexedDB database object
+let ontologyObjects; // Store the ontology objects
 let selectedFile;
 
 // Initialize IndexedDB (same as before)
 const dataDisplay = document.getElementById('dataDisplay');
-const headerDisplay = document.getElementById('headerDisplay');
-const tabs = document.querySelectorAll('.tab');
-const tabPanes = document.querySelectorAll('.tab-pane');
-let db; // IndexedDB database object
 
 // Initialize IndexedDB
 const request = indexedDB.open("dataMapperDB", 1);
@@ -57,30 +53,34 @@ fetch('ontology-objects.json')
     .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Handle successful fetch (e.g., process data)
+        // ...
+    })
+    .catch(error => {
+        // Handle fetch error (e.g., log error)
+        console.error("Error loading ontology objects:", error);
+    });
+
+// Tab switching logic (outside the fetch block)
 tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    // Remove active class from all tabs and panes
-    tabs.forEach(t => t.classList.remove('active'));
-    tabPanes.forEach(pane => pane.classList.remove('active'));
+    tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tabPanes.forEach(pane => pane.classList.remove('active'));
 
-    // Add active class to the clicked tab and corresponding pane
-    const targetPaneId = tab.dataset.tab;
-    const targetPane = document.getElementById(targetPaneId);
-    tab.classList.add('active');
-    targetPane.classList.add('active');
+        const targetPaneId = tab.dataset.tab;
+        const targetPane = document.getElementById(targetPaneId);
+        tab.classList.add('active');
+        targetPane.classList.add('active');
 
-    if (targetPaneId === 'headers') {
-      displayHeaders(); // Call function to display headers
-    }
-  });
+        if (targetPaneId === 'headers') {
+            displayHeaders();
+        }
+    });
 });
-
-const dataTable = document.getElementById('dataTable');
-const mappingContainer = document.getElementById('mappingContainer');
-const jsonDataDisplay = document.getElementById('jsonDataDisplay');
-
-
-let ontologyObjects; // Store the ontology objects
 
 // Fetch ontology objects (Improved handling)
 fetch('ontology-objects.json')
@@ -103,6 +103,7 @@ fetch('ontology-objects.json')
         const errorSelects = document.querySelectorAll('#mappingContainer select:nth-child(2)'); // Select the ontology selects
         errorSelects.forEach(select => {
           select.innerHTML = '<option>Error loading ontology objects</option>';
+            });
         });
     });
 

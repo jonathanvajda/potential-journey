@@ -17,20 +17,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Build and Deploy Master
+      - name: Prepare Master Deployment
         if: github.ref == 'refs/heads/master'
         run: |
           mkdir -p public
-          rsync -av --exclude=public --exclude=.git ./ public/
+          rsync -av --exclude=.git --exclude=public ./ public/
           touch public/.nojekyll
-          echo "Master branch deployed"
+          echo "Master branch deployed to /"
 
-      - name: Build and Deploy Dev
+      - name: Prepare Dev Deployment
         if: github.ref == 'refs/heads/dev'
         run: |
           mkdir -p public/dev
-          rsync -av --exclude=public --exclude=.git ./ public/dev/
-          touch public/dev/.nojekyll
+          rsync -av --exclude=.git --exclude=public ./ public/dev/
+          touch public/.nojekyll
           echo "Dev branch deployed to /dev"
 
       - name: Upload artifact

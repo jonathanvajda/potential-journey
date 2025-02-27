@@ -17,20 +17,20 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Prepare Master Deployment
+      - name: Build and Deploy Master
         if: github.ref == 'refs/heads/master'
         run: |
           mkdir -p public
-          rsync -av --exclude=.git --exclude=public ./ public/
+          cp -r * public/
           touch public/.nojekyll
-          echo "Master branch deployed to /"
+          echo "Master branch deployed"
 
-      - name: Prepare Dev Deployment
+      - name: Build and Deploy Dev
         if: github.ref == 'refs/heads/dev'
         run: |
           mkdir -p public/dev
-          rsync -av --exclude=.git --exclude=public ./ public/dev/
-          touch public/.nojekyll
+          cp -r * public/dev/
+          touch public/dev/.nojekyll
           echo "Dev branch deployed to /dev"
 
       - name: Upload artifact
@@ -41,9 +41,6 @@ jobs:
   deploy-pages:
     needs: deploy
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-
     permissions:
       pages: write
       id-token: write
